@@ -1,4 +1,4 @@
-checkNNGradients <- function(lambda){
+checkNNGradients <- function(lambda=0){
   
   #CHECKNNGRADIENTS Creates a small neural network to check the
   #backpropagation gradients

@@ -3,15 +3,17 @@
 # To run this script please ensure to store these functions in 
 # the same folder as this file and set this folder as working directory
 
-#     checkNNGradients.R 
-#     computeNumericalGradient.R 
-#     sigmoid.R
-#     sigmoidGradient.R
-#     debugInitializeWeights.R
-#     nnCostFunction.R
-#     randInitializeWeights.R
-#     predict.R
-#     displayData.R
+#     checkNNGradients.R (For validating nnCostFunction function)
+#     computeNumericalGradient.R (For calculating numerical gradient)
+#     sigmoid.R (Activation function)
+#     sigmoidGradient.R (gradient of activation function)
+#     debugInitializeWeights.R (For debugging weights)
+#     nnCostFunction.R (For calculating cost and gradient)
+#     randInitializeWeights.R (For random initialization of weights)
+#     predict.R (For predicting the output)
+#     displayData.R (For displaying the data and weights in a grid)
+#     nnCostOptimFunction.R (For using optimizer in R to optimize weights at minimized cost)
+#     nnGradOptimFunction.R (For using optimizer in R to optimize weights at minimized cost)
 
 
 #Setting the working directory
@@ -48,6 +50,11 @@ source('predict.R')
 #Loading data display function
 source('displayData.R')
 
+#Loading nnCostOptimFunction function
+source('nnCostOptimFunction.R')
+
+#Loading nnGradOptimFunction function
+source('nnGradOptimFunction.R')
 
 
 # Setup the parameters you will use for this part of the exercise
@@ -130,19 +137,97 @@ initial_nn_params = c(as.vector(initial_Theta1) , as.vector(initial_Theta2))
 
 #Implement Backpropagation
 
-ch <- checkNNGradients(0)
+checkNNGradients()
                       
 
 #Check gradients by running checkNNGradients
-lambda = 3;
-checkNNGradients(lambda);
+lambda = 3
+checkNNGradients(lambda)
 
 # Also output the costFunction debugging values
 debug_J  = nnCostFunction(nn_params, input_layer_size,hidden_layer_size, num_labels, X, y, lambda);
 
-debug_J <- debug_J$J
-
 cat('\n\nCost at (fixed) debugging parameters (w/ lambda = 10):',
-    '\n(this value should be about 0.576051)\n\n', debug_J)
+    '\n(this value should be about 0.576051)\n\n', debug_J$J)
 
+
+#Training Neural Network
+# Set regularization parameter lambda to 1 (you should vary this)
+lambda = 1
+
+#Compute and display Weights and cost using optim() as optimizer
+#num_iter = 100
+
+costh <- optim(par=initial_nn_params, fn=nnCostOptimFunction, gr=nnGradOptimFunction, 
+               method="BFGS", input_layer_size=input_layer_size,
+               hidden_layer_size=hidden_layer_size, num_labels=num_labels,
+               X=X,y=y,lambda=lambda, control = list(maxit=100))
+
+nn_params <- costh$par
+#grad <- costh$gradient
+cost <- costh$value
+
+
+cat('Cost at Weights found after optimization:', '\n', cost)
+
+# Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
+# for our 2 layer neural network
+
+Theta1 <- nn_params[1:(hidden_layer_size*(input_layer_size + 1))]
+dim(Theta1) <- c(hidden_layer_size, (input_layer_size + 1))
+
+Theta2 <- nn_params[(1 + (hidden_layer_size * (input_layer_size + 1))):length(nn_params)]
+dim(Theta2) <- c(num_labels, (hidden_layer_size + 1))
+
+#Vizualising hidden layer's Weights
+
+displayData(Theta1[, 2:ncol(Theta1)])
+
+
+#Prediction
+pred = predict(Theta1, Theta2, X)
+
+cat('The train accuracy should be about 95.3%','\n',
+    '(this may vary by about 1% due to the random initialization)')
+cat('Training Set Accuracy:\n',mean((pred == y))*100)
+
+
+#Compute and display Weights and cost using nlminb() as optimizer
+#num_iter = 100
+
+costh <- nlminb(start=initial_nn_params, objective=nnCostOptimFunction, 
+                gradient=nnGradOptimFunction, input_layer_size=input_layer_size,
+                hidden_layer_size=hidden_layer_size, num_labels=num_labels,
+                X=X,y=y,lambda=lambda, control = list(iter.max=100))
+
+nn_params <- costh$par
+#grad <- costh$gradient
+cost <- costh$objective
+
+
+cat('Cost at Weights found after optimization:', '\n', cost)
+
+# Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
+# for our 2 layer neural network
+
+Theta1 <- nn_params[1:(hidden_layer_size*(input_layer_size + 1))]
+dim(Theta1) <- c(hidden_layer_size, (input_layer_size + 1))
+
+Theta2 <- nn_params[(1 + (hidden_layer_size * (input_layer_size + 1))):length(nn_params)]
+dim(Theta2) <- c(num_labels, (hidden_layer_size + 1))
+
+#Vizualising hidden layer's Weights
+
+displayData(Theta1[, 2:ncol(Theta1)])
+
+
+#Prediction
+pred = predict(Theta1, Theta2, X)
+
+cat('The train accuracy should be about 95.3%','\n',
+    '(this may vary by about 1% due to the random initialization)')
+cat('Training Set Accuracy:\n',mean((pred == y))*100)
+
+#Both optim() and nlminb() take the same amount of time
+#Their accuracies are similar as well
 
