@@ -6,6 +6,7 @@
 #     featureNormalize.R (For narmalizing variables)
 #     polyFeatures.R (For creating polynomial features)
 #     learningCurve.R (For generating train and CV errors on each example)
+#     learningCurveRandomized.R (For generating average train and CV errors over random examples)
 #     trainLinearReg.R (for training the model)
 #     validationCurve.R (For generating train and CV errors on different lambda values)
 #     plotFit.R (For plotting fits)
@@ -28,6 +29,9 @@ source('polyFeatures.R')
 
 #Loading learningCurve function
 source('learningCurve.R')
+
+#Loading learningCurveRandomized function
+source('learningCurveRandomized.R')
 
 #Loading trainLinearReg function
 source('trainLinearReg.R')
@@ -195,6 +199,7 @@ vald <- validationCurve(X_poly, y, X_poly_val, yval)
 lambda_vec <- vald$lambda_vec
 error_train <- vald$error_train
 error_val <- vald$error_val
+theta <- vald$theta
 
 plot(lambda_vec, error_train, xlab='lambda', ylab='Error', type = 'l',col="blue")
 lines(lambda_vec, error_val, col="green")
@@ -202,4 +207,48 @@ legend("topright",legend=c('Training', 'Cross Validation'), lwd = 1, lty=c(1,1),
 
 df <- data.frame(lambda_vec, error_train, error_val)
 df
+theta
+
+#Testing the model on test data
+#Theta for lambda=3 is theta[9,], obtained using train data
+#Note, Regularization is used only to obtain optimum theta values
+#Hence,on test data we don't use regularization term,  
+#therefore,lambda=0 for calculating cost for test data
+
+cost <- linearRegCostFunction(X_poly_test, ytest, theta[9,], lambda=0)
+
+cat('Cost of test data at theta obtained from train data with lambda = 3:',cost,
+         '\n','(this value should be about 3.8599)')
+
+
+
+#Learning Curve for Linear Regression with random examples repeated n times
+#Initialize values
+lambda = 0.01
+n=50
+
+#The following function calculates train and CV errors for i set of random examples
+#Repeats n times for each i set of random examples
+#Takes average of errors (train and cross validation seperately)
+#Repeats the above process for m times (number of observations in training set) 
+lc <- learningCurveRandomized(X_poly, y,X_poly_val, yval, lambda,n)
+error_train <- lc$error_train
+error_val <- lc$error_val
+
+# Number of training/cross validation examples
+
+{if(length(y)<=length(yval)) m = length(y)
+
+else m = length(yval)
+}
+plot(1:(m-1), error_train,ylim = c(0,100), xlim=c(0,12),
+     xlab ='Number of training examples', ylab='Errors', type = 'l',col="blue")
+lines(1:(m-1), error_val, col="green")
+legend("topright",legend=c('Training', 'Cross Validation'), lwd = 1, lty=c(1,1),col=c("blue","green"))
+
+df <- data.frame(error_train, error_val,row.names = NULL)
+df
+
+
+
 

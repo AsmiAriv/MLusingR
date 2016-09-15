@@ -13,6 +13,8 @@ validationCurve <- function(X, y, Xval, yval){
   lambda_vec = c(0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10)
   
   m <- length(lambda_vec)
+
+  theta_val <- matrix(rep(0,length(lambda_vec)*ncol(X)),ncol=ncol(X))
   
   error_train = rep(0,m)
   error_val   = rep(0,m)
@@ -20,13 +22,13 @@ validationCurve <- function(X, y, Xval, yval){
   for(i in 1:m){
     
     lambda <- lambda_vec[i]
-    theta = trainLinearReg(X, y, lambda);
-    theta = theta$theta
-    error_train[i] = linearRegCostFunction(X, y, theta, 0);
-    error_val[i] =  linearRegCostFunction(Xval, yval, theta, 0);
+    res = trainLinearReg(X, y, lambda);
+    theta_val[i,] = res$theta
+    error_train[i] = linearRegCostFunction(X, y, theta_val[i,], 0);
+    error_val[i] =  linearRegCostFunction(Xval, yval, theta_val[i,], 0);
     
   }
   
   
-  list(lambda_vec=lambda_vec, error_train=error_train, error_val=error_val)  
+  list(lambda_vec=lambda_vec, error_train=error_train, error_val=error_val, theta=theta_val)  
 }
