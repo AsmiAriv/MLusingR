@@ -11,4 +11,4 @@
 ##Having finished the course successfully, I thought of converting the entire matlab codes into R codes
 ##That's what I have done here. 
 
-##I am still working on the others (3 more to go)
+##I am still working on the others (2 more to go)
