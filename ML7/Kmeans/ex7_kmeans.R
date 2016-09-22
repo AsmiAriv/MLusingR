@@ -49,8 +49,7 @@ source('kMeansInitCentroids.R')
 library(R.matlab) #Required for reading .mat file
 
 # Load an example dataset that we will be using
-data <- readMat('ex7data2.mat') # training data stored in arrays X, y
-
+data <- readMat('ex7data2.mat') 
 X <- data[[1]]
 
 #Select an initial set of centroids
@@ -154,7 +153,7 @@ dim(X_recovered) = c(img_size[1], img_size[2], 3)
 
 # Display the original image 
 par(mfrow=c(1, 2))
-plot(0, type='n', xlim=0:1, ylim=0:1, main = "Original")
+plot(0, type='n', xlim=0:1, ylim=0:1, main = "Original 128X128 Image")
 rasterImage(as.raster(A), 0, 0, 1, 1) 
 
 # Display the Compressed image 
