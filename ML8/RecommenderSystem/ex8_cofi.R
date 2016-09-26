@@ -167,8 +167,11 @@ initial_parameters = c(as.vector(X), as.vector(Theta))
 #Set Regularization
 lambda = 10
 
+#Using optim() function as optimizer with the option "L-BFGS-B"
+#If you use "BFGS" for this dataset, it would require 4 GB ram, hence 
+#a system with 6-8GB Ram
 costh <- optim(par=initial_parameters, fn=cofiCostFunc, gr=cofiGradFunc, 
-               method="BFGS", Y, R, num_users, num_movies,num_features, lambda,
+               method="L-BFGS-B", Ynorm, R, num_users, num_movies,num_features, lambda,
                control = list(maxit=100))
 
 params <- costh$par
